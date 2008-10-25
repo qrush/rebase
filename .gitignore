@@ -4,3 +4,4 @@ config/database.yml
 log/*.log
 tmp/**/*
 .DS_Store
+db/*.sqlite3

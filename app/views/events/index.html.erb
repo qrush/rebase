@@ -1,0 +1,30 @@
+<% title "GitHub Rebase" %>
+
+<h2>Totals:</h2>
+<% for group in @groups %>
+	<p>
+	<b><%= link_to group.first, events_path(:kind => group.first) %></b>: <%= group.last %>
+	</p>
+<% end %>
+
+<% if params[:kind] %>
+<h2>Showing all <%= params[:kind] %> events:</h2>
+<table>
+  <tr>
+    <th>Author</th>
+    <th>Published</th>
+    <th>Message</th>
+    <th>Title</th>
+  </tr>
+  <% for event in @events %>
+    <tr>
+      <td><%=h event.author %></td>
+      <td><%=h event.published %></td>
+      <td><%=h event.title %></td>
+      <td><%= event.message %></td>
+    </tr>
+  <% end %>
+</table>
+<% end %>
+
+<p><%= link_to "Parse Feed!", events_path, :method => :post %></p>

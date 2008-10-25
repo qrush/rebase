@@ -1,0 +1,13 @@
+one:
+  type: MyString
+  author: MyString
+  published: 2008-10-25
+  message: MyText
+  title: MyString
+
+two:
+  type: MyString
+  author: MyString
+  published: 2008-10-25
+  message: MyText
+  title: MyString
