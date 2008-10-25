@@ -3,7 +3,7 @@ require 'open-uri'
 
 class EventsController < ApplicationController
   def index
-    @groups = Event.count(:group => :kind)
+    @groups = Event.count(:group => :kind).sort_by(&:last).reverse
     
     if params[:kind]
       @events = Event.find_all_by_kind(params[:kind])
