@@ -27,4 +27,7 @@
 </table>
 <% end %>
 
-<p><%= link_to "Parse Feed!", events_path, :method => :post %></p>
+<p>
+	<%= link_to "Parse Feed!", events_path, :method => :post %> |
+  <%= link_to "Nuke Events!", event_path(:id => 0), :confirm => 'Are you sure?', :method => :delete %>
+</p>
