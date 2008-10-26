@@ -21,6 +21,9 @@
     <th>Published</th>
     <th>Message</th>
     <th>Title</th>
+		<th>Watchers</th>
+		<th>Network</th>
+		<th>Wiki</th>
   </tr>
   <% for event in @events %>
     <tr>
@@ -28,6 +31,12 @@
       <td><%=h event.published %></td>
       <td><%=h event.title %></td>
       <td><%= event.message %></td>
+
+			<% if event.repo %>
+	      <td><%=h event.repo.watchers %></td>
+	      <td><%=h event.repo.network %></td>
+	      <td><%=h event.repo.wiki %></td>
+			<% end %>
     </tr>
   <% end %>
 </table>

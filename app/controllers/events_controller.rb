@@ -1,6 +1,4 @@
 require 'feed-normalizer'
-require 'open-uri'
-require 'google_chart'
 
 class EventsController < ApplicationController
   

@@ -1,0 +1,24 @@
+<% title "Repo" %>
+
+<p>
+  <strong>Event:</strong>
+  <%=h @repo.event_id %>
+</p>
+<p>
+  <strong>Watchers:</strong>
+  <%=h @repo.watchers %>
+</p>
+<p>
+  <strong>Network:</strong>
+  <%=h @repo.network %>
+</p>
+<p>
+  <strong>Wiki:</strong>
+  <%=h @repo.wiki %>
+</p>
+
+<p>
+  <%= link_to "Edit", edit_repo_path(@repo) %> |
+  <%= link_to "Destroy", @repo, :confirm => 'Are you sure?', :method => :delete %> |
+  <%= link_to "View All", repos_path %>
+</p>

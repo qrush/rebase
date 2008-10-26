@@ -1,0 +1,11 @@
+one:
+  event_id: 1
+  watchers: 1
+  network: 1
+  wiki: 1
+
+two:
+  event_id: 1
+  watchers: 1
+  network: 1
+  wiki: 1

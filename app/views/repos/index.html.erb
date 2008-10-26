@@ -1,0 +1,27 @@
+<% title "Repos" %>
+
+<table>
+  <tr>
+    <th>Event</th>
+    <th>Watchers</th>
+    <th>Network</th>
+    <th>Wiki</th>
+  </tr>
+  <% for repo in @repos %>
+    <tr>
+      <td><%=h repo.event_id %></td>
+      <td><%=h repo.watchers %></td>
+      <td><%=h repo.network %></td>
+      <td><%=h repo.wiki %></td>
+      <td><%= link_to "Show", repo %></td>
+      <td><%= link_to "Edit", edit_repo_path(repo) %></td>
+      <td><%= link_to "Destroy", repo, :confirm => 'Are you sure?', :method => :delete %></td>
+    </tr>
+  <% end %>
+</table>
+
+<p>
+	<%= link_to "Parse!", repos_path, :method => :post %> |
+  <%= link_to "Nuke!", repo_path(:id => 0), :confirm => 'Are you sure?', :method => :delete %>
+</p>
+
