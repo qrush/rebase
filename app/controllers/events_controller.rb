@@ -13,22 +13,22 @@ class EventsController < ApplicationController
     @event_count = Event.count / (7 * 24 * 60).to_f.round(3)
     
     title = lambda { |t| "GitHub Rebase — #{t} — #{START_DATE.to_formatted_s(:date)} to #{STOP_DATE.to_formatted_s(:date)}" }
-    y_axis = {:color => '000000', :font_size => 12, :alignment => :center}
+    y_axis = {:color => '000000', :font_size => 10, :alignment => :right}
     
-    @total_chart = GoogleChart::BarChart.new('800x375', title.call("Total Events"), :horizontal, false) { |bc| 
+    @total_chart = GoogleChart::BarChart.new('530x375', title.call("Total Events"), :horizontal, false) { |bc| 
       bc.data "", @total_grouped.map(&:last), '336699'
       bc.show_legend = false 
-      bc.axis :y, :labels => @total_grouped.map{|g| "#{g.first} (#{g.last})"}.reverse, :color => '4183c4', :font_size => 14, :alignment => :right
-      bc.axis :x, :range => [0,15000], :color => '000000', :font_size => 14, :alignment => :center
+      bc.axis :y, :labels => @total_grouped.map{|g| "#{g.first} (#{g.last})"}.reverse, :color => '4183c4', :font_size => 10, :alignment => :right
+      bc.axis :x, :range => [0,15000], :color => '000000', :font_size => 10, :alignment => :center
       bc.width_spacing_options :bar_width => 22, :bar_spacing => 2
       bc.fill :background, :solid, :color => 'f0f0f0'
     }.to_url
     
-    @daily_chart = GoogleChart::LineChart.new('800x375', title.call("Daily Events"), false) { |lc|
+    @daily_chart = GoogleChart::LineChart.new('530x375', title.call("Daily Events"), false) { |lc|
       lc.show_legend = false
       lc.data "", @daily_grouped.map(&:last), '336699'
       lc.fill_area 'bbccd9', 0, 0 
-      lc.axis :x, :labels => @daily_grouped.map{|g| g.first.to_datetime.to_formatted_s(:date_small)}, :color => '4183c4', :font_size => 16, :alignment => :right
+      lc.axis :x, :labels => @daily_grouped.map{|g| g.first.to_datetime.to_formatted_s(:date_small)}, :color => '4183c4', :font_size => 9, :alignment => :right
       lc.axis :y, y_axis.merge(:range => [0,4500])
       lc.fill :background, :solid, :color => 'f0f0f0'
     }.to_url
