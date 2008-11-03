@@ -3,12 +3,16 @@ require 'feed-normalizer'
 class EventsController < ApplicationController
   
   def index
+    
     @events = Event.find_all_by_kind(params[:kind]) if params[:kind]
     @total_grouped = Event.count(:group => :kind).sort_by(&:last).reverse
     @daily_grouped = Event.count(:group => 'date(published)')
     @event_count = Event.count / (7 * 24 * 60).to_f.round(3)
     
-    title = lambda { |t| "GitHub Rebase — #{t} — #{START_DATE.to_formatted_s(:date)} to #{STOP_DATE.to_formatted_s(:date)}" }
+    start_date = @daily_grouped.first.first
+    stop_date = @daily_grouped.last.last
+    
+    title = lambda { |t| "GitHub Rebase — #{t} — #{start_date} to #{stop_date}" }
     y_axis = {:color => '000000', :font_size => 10, :alignment => :right}
     
     @total_chart = GoogleChart::BarChart.new('530x375', title.call("Total Events"), :horizontal, false) { |bc| 
