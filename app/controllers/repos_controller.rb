@@ -1,6 +1,6 @@
 class ReposController < ApplicationController
   def index
-    @repos = Repo.find(:all, :order => 'watchers desc')
+    @repos = Repo.find(:all, :order => 'commits desc')
   end
   
   def show
@@ -8,8 +8,9 @@ class ReposController < ApplicationController
   end
   
   def commits
-    Event.find_all_by_kind("commit").each do |event|
-
+    Event.find_all_by_kind("commit").each_with_index do |event, i|
+      logger.info ">>>> Parsing #{i}"
+      
       title = event.title.split('/').last
       repo = Repo.find_by_title(title)
       
@@ -65,14 +66,18 @@ class ReposController < ApplicationController
   end
   
   protected 
-    def parse_repo(event_id, title, url) 
+    def parse_repo(event_id, title, url)
+      nodes = []
+      
       begin
-        nodes = (Hpricot(open(url))/".site ul a")
+        timeout(15) do
+          nodes = (Hpricot(open(url))/".site ul a")
+        end
       rescue OpenURI::HTTPError => e
         logger.info "Document is not accessible: #{url}"
       rescue RuntimeError => e
         logger.info "Document is not public: #{url}"
-      rescue
+      rescue Timeout::Error => e
         logger.info "Timeout! #{url}"
       end
 
