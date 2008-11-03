@@ -6,8 +6,7 @@ class ReposController < ApplicationController
   def show
     @repo = Repo.find(params[:id])
   end
-  
-  
+
   def create
     Event.find_all_by_kind("create").each do |event|
       next if Repo.exists?(:event_id => event.id)

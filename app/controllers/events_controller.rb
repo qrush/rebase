@@ -2,10 +2,6 @@ require 'feed-normalizer'
 
 class EventsController < ApplicationController
   
-  STOP_DATE = Date.today.to_datetime
-  START_DATE = STOP_DATE - 1.week
-  
-  
   def index
     @events = Event.find_all_by_kind(params[:kind]) if params[:kind]
     @total_grouped = Event.count(:group => :kind).sort_by(&:last).reverse
@@ -33,7 +29,7 @@ class EventsController < ApplicationController
       lc.fill :background, :solid, :color => 'f0f0f0'
     }.to_url
 
-    @event_meter = GoogleChart::PieChart.new('400x175', "", false).to_url(:cht => "gom", :chd => "t:#{@event_count * 10}", :chl => "#{@event_count} events/min")
+    @event_meter = GoogleChart::PieChart.new('400x175', "", false).to_url(:cht => "gom", :chd => "t:#{@event_count * 10}", :chl => "#{@event_count.round(2)} events/min")
   end
   
   def show
@@ -48,9 +44,12 @@ class EventsController < ApplicationController
     
     page = 1
     parse = true
+    start_date = convert_date('start_date')
+    stop_date = convert_date('stop_date')
     
     parse_feed = lambda do |p|   
       begin
+        logger.info "Parsing page #{p}"
         FeedNormalizer::FeedNormalizer.parse open("http://github.com/timeline.atom?page=#{p}")
       rescue Exception => e
         logger.info "Problem parsing the feed: #{e}"
@@ -65,13 +64,13 @@ class EventsController < ApplicationController
           event = Event.new
           event.published = entry.date_published.to_datetime
           
-          if event.published >= START_DATE && event.published <= STOP_DATE
+          if event.published >= start_date && event.published <= stop_date
             event.kind = entry.id.scan(/[A-Za-z]+Event/).first.gsub("Event", "").downcase
             event.author = entry.author.split.first
             event.title = entry.title
             event.message = entry.content
             event.save
-          elsif event.published < START_DATE
+          elsif event.published < start_date
             parse = false
             break
           end
@@ -110,4 +109,12 @@ class EventsController < ApplicationController
     
     redirect_to events_url
   end
+  
+  protected
+    def convert_date(key)
+      q = params[:events]
+      
+      return Date.new(q["#{key}(1i)"].to_i, q["#{key}(2i)"].to_i, q["#{key}(3i)"].to_i)    
+    end
+  
 end

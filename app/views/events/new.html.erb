@@ -1,0 +1,17 @@
+<% title "Parse Setup" %>
+<% form_tag events_path do -%>
+
+	<div>
+		Start: <br />
+		<%= date_select 'events', 'start_date', :order => [:month, :day, :year] %>
+	</div>
+	 <br />
+  <div>
+		Stop:  <br />
+		<%= date_select 'events', 'stop_date', :order => [:month, :day, :year] %>
+	</div>
+ <br />
+  <div>
+		<%= submit_tag 'Parse!' %>
+	</div>
+<% end -%>
