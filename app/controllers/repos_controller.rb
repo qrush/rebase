@@ -18,7 +18,7 @@ class ReposController < ApplicationController
         repo = parse_repo(event.id, title, url)
       end
       
-      repo.increment!(:commits)
+      repo.increment!(:commits) if repo
     end
     
     redirect_to repos_path
@@ -72,6 +72,8 @@ class ReposController < ApplicationController
         logger.info "Document is not accessible: #{url}"
       rescue RuntimeError => e
         logger.info "Document is not public: #{url}"
+      rescue
+        logger.info "Timeout! #{url}"
       end
 
       if nodes && !nodes.empty? 
