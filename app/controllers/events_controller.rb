@@ -9,8 +9,8 @@ class EventsController < ApplicationController
     @daily_grouped = Event.count(:group => 'date(published)')
     @event_count = Event.count / (7 * 24 * 60).to_f.round(3)
     
-    start_date = @daily_grouped.first.first
-    stop_date = @daily_grouped.last.last
+    start_date = DateTime.parse(@daily_grouped.first.first).to_formatted_s(:date)
+    stop_date = DateTime.parse(@daily_grouped.last.first).to_formatted_s(:date)
     
     title = lambda { |t| "GitHub Rebase — #{t} — #{start_date} to #{stop_date}" }
     y_axis = {:color => '000000', :font_size => 10, :alignment => :right}
