@@ -79,6 +79,8 @@ class ReposController < ApplicationController
         logger.info "Document is not public: #{url}"
       rescue Timeout::Error => e
         logger.info "Timeout! #{url}"
+      rescue Exception => e
+        logger.info "Something strange happened with #{url}"
       end
 
       if nodes && !nodes.empty? 

@@ -1,17 +1,11 @@
 <% title "GitHub Rebase" %>
-
 <h2>Totals:</h2>
 
+<% [@event_meter, @total_chart, @daily_chart, @hourly_chart].each do |chart| %>
 <p>
-<%= image_tag(@event_meter) %>
-	</p>
-<p>
-<%= image_tag(@total_chart) %>
-	</p>
-
-<p>
-<%= image_tag(@daily_chart) %>
-	</p>
+	<%= image_tag(chart || '') %>
+</p>
+<% end %>
 
 <% if params[:kind] %>
 <h2>Showing all <%= params[:kind] %> events:</h2>

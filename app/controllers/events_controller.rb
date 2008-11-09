@@ -3,11 +3,16 @@ require 'feed-normalizer'
 class EventsController < ApplicationController
   
   def index
+    graph_size = "530x375"
     
     @events = Event.find_all_by_kind(params[:kind]) if params[:kind]
     @total_grouped = Event.count(:group => :kind).sort_by(&:last).reverse
     @daily_grouped = Event.count(:group => 'date(published)')
+    @hourly_grouped = Event.count(:group => "strftime('%m-%d-%Y %H', published)")
     @event_count = Event.count / (7 * 24 * 60).to_f.round(3)
+    @total_count = Event.count
+    
+    return if @daily_grouped.empty?
     
     start_date = DateTime.parse(@daily_grouped.first.first).to_formatted_s(:date)
     stop_date = DateTime.parse(@daily_grouped.last.first).to_formatted_s(:date)
@@ -15,25 +20,43 @@ class EventsController < ApplicationController
     title = lambda { |t| "GitHub Rebase — #{t} — #{start_date} to #{stop_date}" }
     y_axis = {:color => '000000', :font_size => 10, :alignment => :right}
     
-    @total_chart = GoogleChart::BarChart.new('530x375', title.call("Total Events"), :horizontal, false) { |bc| 
-      bc.data "", @total_grouped.map(&:last), '336699'
-      bc.show_legend = false 
-      bc.axis :y, :labels => @total_grouped.map{|g| "#{g.first} (#{g.last})"}.reverse, :color => '4183c4', :font_size => 10, :alignment => :right
-      bc.axis :x, :range => [0,15000], :color => '000000', :font_size => 10, :alignment => :center
-      bc.width_spacing_options :bar_width => 22, :bar_spacing => 2
-      bc.fill :background, :solid, :color => 'f0f0f0'
-    }.to_url
+    @total_chart = GoogleChart::PieChart.new("530x220", title.call("Total Events"), false) { |pc|
+      
+      @total_grouped.each do |group|
+        pc.data "#{group.first}: #{group.last}", (group.last.to_f / @total_count.to_f) * 100
+      end
+      pc.fill_area 'bbccd9', 0, 0
+      pc.is_3d = true
+      pc.fill :background, :solid, :color => 'f0f0f0'
+      
+    }.to_url(:chco => '336699')
     
-    @daily_chart = GoogleChart::LineChart.new('530x375', title.call("Daily Events"), false) { |lc|
+    @daily_chart = GoogleChart::LineChart.new(graph_size, title.call("Daily Events"), false) { |lc|
       lc.show_legend = false
       lc.data "", @daily_grouped.map(&:last), '336699'
       lc.fill_area 'bbccd9', 0, 0 
-      lc.axis :x, :labels => @daily_grouped.map{|g| g.first.to_datetime.to_formatted_s(:date_small)}, :color => '4183c4', :font_size => 9, :alignment => :right
+      lc.axis :x, :labels => 
+        @daily_grouped.map{|g| g.first.to_datetime.to_formatted_s(:date_small)}, :color => '4183c4', :font_size => 9, :alignment => :right
       lc.axis :y, y_axis.merge(:range => [0,4500])
       lc.fill :background, :solid, :color => 'f0f0f0'
     }.to_url
+    
+    @hourly_chart = GoogleChart::LineChart.new(graph_size, title.call("Hourly Events"), false) { |lc|
+      lc.show_legend = false
+      lc.data "", @hourly_grouped.map(&:last), '336699'
+      lc.fill_area 'bbccd9', 0, 0 
+      
+      lc.axis :x, :labels =>
+        @daily_grouped.map(&:first).map(&:to_datetime).map(&:wday).map { |d|
+          Date::DAYNAMES[d][0..1]
+        }.map{ |d| [d, 6, 12, 18] }.flatten + ['Fr'] # Hack for now. Sue me.
+      
+      lc.axis :y, y_axis.merge(:range => [0,@hourly_grouped.map(&:last).max])
+      lc.fill :background, :solid, :color => 'f0f0f0'
+    }.to_url
 
-    @event_meter = GoogleChart::PieChart.new('400x175', "", false).to_url(:cht => "gom", :chd => "t:#{@event_count * 10}", :chl => "#{@event_count.round(2)} events/min")
+    @event_meter = GoogleChart::PieChart.new('400x175', "", false).to_url(
+      :cht => "gom", :chd => "t:#{@event_count * 10}", :chl => "#{@event_count.round(2)} events/min")
   end
   
   def show
