@@ -89,6 +89,7 @@ class EventsController < ApplicationController
       if( parse = (feed && !feed.entries.empty?) )
         feed.entries.each do |entry|
           event = Event.new
+          next unless entry
           event.published = entry.date_published.to_datetime
           
           if event.published >= start_date && event.published <= stop_date

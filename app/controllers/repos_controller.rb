@@ -1,6 +1,6 @@
 class ReposController < ApplicationController
   def index
-    @repos = Repo.find(:all, :order => 'commits desc')
+    @repos = Repo.find(:all, :order => "#{params[:order] || 'title'} desc")
   end
   
   def show

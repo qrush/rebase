@@ -7,15 +7,14 @@
   <%= link_to "Nuke!", repo_path(:id => 0), :confirm => 'Are you sure?', :method => :delete %>
 </p>
 
-
 <table>
   <tr>
     <th>Title</th>
     <th>Event</th>
-    <th>Watchers</th>
-    <th>Network</th>
-    <th>Wiki</th>
-    <th>Commits</th>
+    <th><%= link_to "Watchers", repos_path(:order => 'watchers') %></th>
+    <th><%= link_to "Network", repos_path(:order => 'network') %></th>
+    <th><%= link_to "Wiki", repos_path(:order => 'wiki') %></th>
+    <th><%= link_to "Commits", repos_path(:order => 'commits') %></th>
   </tr>
   <% for repo in @repos %>
     <tr>
