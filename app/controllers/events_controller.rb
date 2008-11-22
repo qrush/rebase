@@ -67,7 +67,7 @@ class EventsController < ApplicationController
       redirect_to events_path and return
     end
     
-    Event.parse(convert_date('start_date'), convert_date('stop_date'))
+    Event.parse(convert_date('start_date'), convert_date('stop_date'), params[:events][:page].to_i)
     
     redirect_to events_path
   end

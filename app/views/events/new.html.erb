@@ -10,6 +10,11 @@
 		Stop:  <br />
 		<%= date_select 'events', 'stop_date', :order => [:month, :day, :year] %>
 	</div>
+  <br />
+  <div>
+		Page Start:  <br />
+		<%= text_field 'events', 'page', :value => 1 %>
+	</div>
  <br />
   <div>
 		<%= submit_tag 'Parse!' %>
