@@ -1,5 +1,3 @@
-require 'feed-normalizer'
-
 class EventsController < ApplicationController
   
   def index
@@ -89,7 +87,8 @@ class EventsController < ApplicationController
       if( parse = (feed && !feed.entries.empty?) )
         feed.entries.each do |entry|
           event = Event.new
-          next unless entry
+          next if entry.nil? || !entry.respond_to?("date_published")
+
           event.published = entry.date_published.to_datetime
           
           if event.published >= start_date && event.published <= stop_date
