@@ -1,0 +1,17 @@
+<% title "Forkers" %>
+
+<table>
+  <tr>
+    <th>Name</th>
+  </tr>
+  <% for forker in @forkers %>
+    <tr>
+      <td><%=h forker.name %></td>
+      <td><%= link_to "Show", forker %></td>
+      <td><%= link_to "Edit", edit_forker_path(forker) %></td>
+      <td><%= link_to "Destroy", forker, :confirm => 'Are you sure?', :method => :delete %></td>
+    </tr>
+  <% end %>
+</table>
+
+<p><%= link_to "New Forker", new_forker_path %></p>

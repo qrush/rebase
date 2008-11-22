@@ -1,0 +1,12 @@
+<% title "Forker" %>
+
+<p>
+  <strong>Name:</strong>
+  <%=h @forker.name %>
+</p>
+
+<p>
+  <%= link_to "Edit", edit_forker_path(@forker) %> |
+  <%= link_to "Destroy", @forker, :confirm => 'Are you sure?', :method => :delete %> |
+  <%= link_to "View All", forkers_path %>
+</p>

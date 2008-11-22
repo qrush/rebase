@@ -67,44 +67,7 @@ class EventsController < ApplicationController
       redirect_to events_path and return
     end
     
-    page = 1
-    parse = true
-    start_date = convert_date('start_date')
-    stop_date = convert_date('stop_date')
-    
-    parse_feed = lambda do |p|   
-      begin
-        logger.info "Parsing page #{p}"
-        FeedNormalizer::FeedNormalizer.parse open("http://github.com/timeline.atom?page=#{p}")
-      rescue Exception => e
-        logger.info "Problem parsing the feed: #{e}"
-      end
-    end
-    
-    while parse
-      feed = parse_feed.call(page)
-      
-      if( parse = (feed && !feed.entries.empty?) )
-        feed.entries.each do |entry|
-          next if entry.nil? || entry.is_a?(String)
-
-          event = Event.new(:published => entry.date_published.to_datetime)
-          
-          if event.published >= start_date && event.published <= stop_date
-            event.kind = entry.id.scan(/[A-Za-z]+Event/).first.gsub("Event", "").downcase
-            event.author = entry.author.split.first
-            event.title = entry.title
-            event.message = entry.content
-            event.save
-          elsif event.published < start_date
-            parse = false
-            break
-          end
-        end
-      end
-      
-      page = page + 1
-    end
+    Event.parse(convert_date('start_date'), convert_date('stop_date'))
     
     redirect_to events_path
   end

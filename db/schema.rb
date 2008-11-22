@@ -9,14 +9,21 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20081103045815) do
+ActiveRecord::Schema.define(:version => 20081122202733) do
 
   create_table "events", :force => true do |t|
     t.string   "kind"
-    t.string   "author"
     t.datetime "published"
     t.text     "message"
     t.string   "title"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.integer  "user_id"
+    t.integer  "forker_id"
+  end
+
+  create_table "forkers", :force => true do |t|
+    t.string   "name"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
@@ -30,6 +37,12 @@ ActiveRecord::Schema.define(:version => 20081103045815) do
     t.datetime "updated_at"
     t.integer  "commits"
     t.string   "title"
+  end
+
+  create_table "users", :force => true do |t|
+    t.string   "name"
+    t.datetime "created_at"
+    t.datetime "updated_at"
   end
 
 end
