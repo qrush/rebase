@@ -86,10 +86,9 @@ class EventsController < ApplicationController
       
       if( parse = (feed && !feed.entries.empty?) )
         feed.entries.each do |entry|
-          event = Event.new
-          next if entry.nil? || !entry.respond_to?("date_published")
+          next if entry.nil? || entry.is_a?(String)
 
-          event.published = entry.date_published.to_datetime
+          event = Event.new(:published => event.published = entry.date_published.to_datetime)
           
           if event.published >= start_date && event.published <= stop_date
             event.kind = entry.id.scan(/[A-Za-z]+Event/).first.gsub("Event", "").downcase
