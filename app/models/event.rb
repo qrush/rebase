@@ -1,3 +1,5 @@
+require 'net/http'
+
 class Event < ActiveRecord::Base
   has_one :repo
   belongs_to :forker
@@ -14,6 +16,7 @@ class Event < ActiveRecord::Base
 
   class << self
     def parse(start, stop, page = 1)
+
       parsing = true
       
       while parsing
