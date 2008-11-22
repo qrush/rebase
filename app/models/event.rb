@@ -2,15 +2,14 @@ class Event < ActiveRecord::Base
   has_one :repo
   belongs_to :forker
 
-  def fill(entry)
-    logger.info "Filling out stuff..."
+  validates_uniqueness_of :unique_id  
 
+  def fill(entry)
     self.forker = Forker.find_or_create_by_name(entry.author.split.first)
     self.kind = entry.id.scan(/[A-Za-z]+Event/).first.gsub("Event", "").downcase
+    self.unique_id = entry.id.scan(/\d+$/).first
     self.title = entry.title
     self.message = entry.content
-
-    logger.info "Yay: #{self.inspect}"
   end
 
   class << self
@@ -21,13 +20,11 @@ class Event < ActiveRecord::Base
         feed = self.get(page)
         
         if( parsing = (feed && !feed.entries.empty?) )
-logger.info "This feed: #{feed.entries.size}"      
           feed.entries.each do |entry|
             next if entry.nil? || entry.is_a?(String)
 
             event = Event.new(:published => entry.date_published.to_datetime)
             
-            logger.info "New event is at: #{event.published}"
             if event.published >= start && event.published <= stop
               event.fill(entry)
               event.save
