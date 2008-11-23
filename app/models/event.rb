@@ -1,5 +1,3 @@
-require 'net/http'
-
 class Event < ActiveRecord::Base
   has_one :repo
   belongs_to :forker
@@ -12,44 +10,7 @@ class Event < ActiveRecord::Base
     self.unique_id = entry.id.scan(/\d+$/).first
     self.title = entry.title
     self.message = entry.content
-  end
 
-  class << self
-    def parse(start, stop, page = 1)
-
-      parsing = true
-      
-      while parsing
-        feed = self.get(page)
-        
-        if( parsing = (feed && !feed.entries.empty?) )
-          feed.entries.each do |entry|
-            next if entry.nil? || entry.is_a?(String)
-
-            event = Event.new(:published => entry.date_published.to_datetime)
-            
-            if event.published >= start && event.published <= stop
-              event.fill(entry)
-              event.save
-            elsif event.published < start
-              parse = false
-              break
-            end
-          end
-        end
-        
-        page += 1
-      end
-    end
-  
-    def get(page)
-      begin
-        logger.info "Parsing page #{page}"
-        FeedNormalizer::FeedNormalizer.parse open("http://github.com/timeline.atom?page=#{page}")
-      rescue Exception => e
-        logger.info "Problem parsing the feed: #{e}"
-      end
-    end
-
+    p self
   end
 end
