@@ -50,7 +50,7 @@ namespace :rebase do
         puts "Downloading page #{start}"
 
         resp = http.get("/timeline.atom?page=#{start}")
-        open("#{RAILS_ROOT}/db/timeline/#{start}.atom", "wb") do |file|
+        open("#{TIMELINE_ROOT}/#{start}.atom", "wb") do |file|
           file.write(resp.body)
         end
 
@@ -73,6 +73,16 @@ namespace :rebase do
   task :rip do
     3.times do |i|
       Kernel.fork { `rake rebase:download start=#{i+1} stop=#{ENV['stop']}` }
+    end
+  end
+
+  desc "Throw out any error pages"
+  task :throwout => :environment do
+    (1..ENV['stop'].to_i).each do |i|
+      delete = false
+      path = "#{TIMELINE_ROOT}/#{i}.atom"
+      open(path, "r") { |f|  delete = true if f.readline  =~ /^<!/ }
+      FileUtils.rm(path, :verbose => true) if delete
     end
   end
 
