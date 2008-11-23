@@ -1,6 +1,29 @@
 class EventsController < ApplicationController
   
   def index
+    c = Chartify.new
+
+    @weekly_chart = c.line_chart("Weekly Chart", []) do |chart|
+      Event.kinds.each do |kind|
+       chart.data kind, Event.count(:group => 'date(published)', :conditions => ["kind = ?", kind]).map(&:last)
+      end
+    end
+
+    @total_chart = c.pie_chart("Total Events") do |chart|
+      total_count = Event.count
+      Event.count(:group => :kind).sort_by(&:last).reverse.each do |group|
+        chart.data "#{group.first}: #{group.last}", (group.last.to_f / total_count.to_f) * 100
+      end
+    end
+
+        
+    @daily_grouped = Event.count(:group => 'date(published)')
+    @daily_chart = c.line_chart("Daily Events", [0,4500]) do |chart|
+      chart.show_legend = false
+      chart.data "", @daily_grouped.map(&:last), '336699'
+    end
+    
+
 =begin
 
     graph_size = "530x375"
@@ -10,7 +33,7 @@ class EventsController < ApplicationController
     @daily_grouped = Event.count(:group => 'date(published)')
     @hourly_grouped = Event.count(:group => "strftime('%m-%d-%Y %H', published)")
     @event_count = Event.count / (7 * 24 * 60).to_f.round(3)
-    @total_count = Event.count
+
     
     return if @daily_grouped.empty?
     
