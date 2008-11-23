@@ -4,6 +4,8 @@ class Event < ActiveRecord::Base
 
   validates_uniqueness_of :unique_id  
 
+  named_scope :kinds, :group => :kind, :select => :kind
+
   def fill(entry)
     self.forker = Forker.find_or_create_by_name(entry.author.split.first)
     self.kind = entry.id.scan(/[A-Za-z]+Event/).first.gsub("Event", "").downcase

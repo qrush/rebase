@@ -1,17 +1,19 @@
-<% title "Forkers" %>
+<% title "Forkers by #{@kind}" %>
+
+<% @kinds.each do |kind| %>
+  <%= link_to_unless_current kind, forkers_path(:kind => kind) %>
+<% end %>
 
 <table>
   <tr>
     <th>Name</th>
+    <th><%= @kind %></th>
   </tr>
-  <% for forker in @forkers %>
+  <% @groups.each_with_index do |group, i| %>
     <tr>
-      <td><%=h forker.name %></td>
-      <td><%= link_to "Show", forker %></td>
-      <td><%= link_to "Edit", edit_forker_path(forker) %></td>
-      <td><%= link_to "Destroy", forker, :confirm => 'Are you sure?', :method => :delete %></td>
+      <td><%=h Forker.find(group.first) %></td>
+      <td><%=h group.last %></td>
     </tr>
   <% end %>
 </table>
 
-<p><%= link_to "New Forker", new_forker_path %></p>
