@@ -32,11 +32,8 @@ namespace :rebase do
       
       page += 1
     end
-
   end
   
-
-
   desc "Download timeline feeds from GitHub"
   task :download  => :environment do
     require 'net/http'
@@ -60,7 +57,7 @@ namespace :rebase do
   end
 
   desc "Get rid of the files in db/timeline"
-  task :nuke_timeline do
+  task :nuke_timeline => :environment do
     FileUtils.rm_r Dir.glob(TIMELINE_GLOB)
   end
 
@@ -81,7 +78,7 @@ namespace :rebase do
     (1..ENV['stop'].to_i).each do |i|
       delete = false
       path = "#{TIMELINE_ROOT}/#{i}.atom"
-      open(path, "r") { |f|  delete = true if f.readline  =~ /^<!/ }
+      open(path, "r") { |f| delete = true if f.readline  =~ /^<!/ }
       FileUtils.rm(path, :verbose => true) if delete
     end
   end
@@ -91,7 +88,6 @@ namespace :rebase do
     stop = ENV['stop'].to_i
     real = (1..stop).to_a.sort
     current = Dir.glob(TIMELINE_GLOB).map{|f| f.scan(/\d+/).first.to_i}.sort
-
     p (real - current)
   end
 
