@@ -1,5 +1,6 @@
 class EventsController < ApplicationController
   
+  # this needs some serious refactoring
   def index
     graph_size = "530x375"
     
@@ -17,6 +18,22 @@ class EventsController < ApplicationController
     
     title = lambda { |t| "GitHub Rebase — #{t} — #{start_date} to #{stop_date}" }
     y_axis = {:color => '000000', :font_size => 10, :alignment => :right}
+
+    @weekly_chart = GoogleChart::LineChart.new(graph_size, title.call("Weekly Events"), false) { |lc|
+      
+      lc.fill_area 'bbccd9', 0, 0 
+
+      Event.kinds.each do |kind|
+       lc.data kind, Event.count(:group => 'date(published)', :conditions => ["kind = ?", kind]).map(&:last)
+      end
+
+#      lc.max_value 10 # Setting max value for simple line chart 
+      #lc.range_marker :horizontal, :color => 'E5ECF9', :start_point => 0.1, :end_point => 0.5
+      #lc.range_marker :vertical, :color => 'a0bae9', :start_point => 0.1, :end_point => 0.5
+      # Draw an arrow shape marker against lowest value in dataset
+      #lc.shape_marker :arrow, :color => '000000', :data_set_index => 0, :data_point_index => 3, :pixel_size => 10   
+    }.to_url
+
     
     @total_chart = GoogleChart::PieChart.new("530x220", title.call("Total Events"), false) { |pc|
       
@@ -47,7 +64,7 @@ class EventsController < ApplicationController
       lc.axis :x, :labels =>
         @daily_grouped.map(&:first).map(&:to_datetime).map(&:wday).map { |d|
           Date::DAYNAMES[d][0..1]
-        }.map{ |d| [d, 6, 12, 18] }.flatten + ['Fr'] # Hack for now. Sue me.
+        }.map{ |d| [d, 6, 12, 18] }.flatten
       
       lc.axis :y, y_axis.merge(:range => [0,@hourly_grouped.map(&:last).max])
       lc.fill :background, :solid, :color => 'f0f0f0'

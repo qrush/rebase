@@ -1,10 +1,8 @@
 class ForkersController < ApplicationController
   def index
     @kind = params[:kind] || "commit"
-
-    @kinds = Event.kinds.map(&:kind)
+    @kinds = Event.kinds
     @groups = Event.count(:group => :forker_id, :conditions => ["kind = ?", @kind]).sort{ |x, y| x.last <=> y.last }.reverse
-
    # @forkers = Forker.all(:conditions => ["id in (?)", @groups.map(&:first)])
   end
   

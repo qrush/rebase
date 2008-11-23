@@ -1,7 +1,7 @@
 <% title "GitHub Rebase" %>
 <h2>Totals:</h2>
 
-<% [@event_meter, @total_chart, @daily_chart, @hourly_chart].each do |chart| %>
+<% [@weekly_chart, @event_meter, @total_chart, @daily_chart, @hourly_chart].each do |chart| %>
 <p>
 	<%= image_tag(chart || '') %>
 </p>
