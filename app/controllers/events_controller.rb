@@ -3,11 +3,12 @@ class EventsController < ApplicationController
   def index
     c = Chartify.new
 
-    @weekly_chart = c.line_chart("Weekly Chart", Event.max_daily_commits) do |chart|
+    @weekly_chart = c.line_chart("Events Breakdown", Event.max_daily_commits) do |chart|
       colors = ["000000", "ff0000","00ff00", "0000ff", "FFFF00", "3CB371", "ff00ff", "FF9900", "FFFF99", "993399"]
       
       Event.kinds.each_with_index do |kind, i|
-        chart.data kind, Event.count(:group => 'date(published)', :conditions => ["kind = ?", kind]).map(&:last), colors[i]
+  chart.data kind, Event.count(:group => "strftime('%m-%d-%Y %H', published)", :conditions => ["kind = ?", kind]).map(&:last), colors[i]
+       # chart.data kind, Event.count(:group => 'date(published)', :conditions => ["kind = ?", kind]).map(&:last), colors[i]
       end
     end
 
