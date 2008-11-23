@@ -11,7 +11,8 @@ class Chartify
   def line_chart(title, range, &block)
     chartify("530x375", title, GoogleChart::LineChart, block) do |chart|
       chart.axis :x, AXIS_STYLE.merge(:labels => (@start..@stop).map{|d| d.strftime("%m-%d")})
-      chart.axis :y, AXIS_STYLE.merge(:range => range)
+      chart.axis :y, AXIS_STYLE.merge(:range => [0, range])
+      chart.fill_area 'bbccd9', 0, 0
     end
   end
 
@@ -21,12 +22,17 @@ class Chartify
     end
   end
 
+  def meter_chart(title, count, &block)
+    chartify("530x175", title, GoogleChart::PieChart, block,
+      :cht => "gom", :chd => "t:#{count * 10}", :chl => "#{count.round(2)} events/min")
+  end
+
   protected
     def chartify(size, title, type, data_block, options = {}, &graph_block)
       type.new(size, titlify(title), false) { |chart|
         chart.fill :background, :solid, :color => 'f0f0f0' 
-        data_block.call(chart)
         graph_block.call(chart) if graph_block
+        data_block.call(chart) if data_block
       }.to_url(options)
     end
 

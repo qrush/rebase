@@ -2,12 +2,25 @@ class Event < ActiveRecord::Base
   has_one :repo
   belongs_to :forker
 
-  validates_uniqueness_of :unique_id  
+  validates_uniqueness_of :unique_id 
 
   class << self 
     def kinds
       all(:group => :kind, :select => :kind).map(&:kind)
     end
+
+    def max_daily_events
+      count(:group => 'date(published)').map(&:last).max
+    end
+
+    def max_daily_commits
+      count(:group => 'date(published)', :conditions => "kind = 'commit'").map(&:last).max
+    end
+    
+    def hourly_events
+      @hourly_events ||= Event.count(:group => "strftime('%m-%d-%Y %H', published)").map(&:last)
+    end
+  
   end 
 
   def fill(entry)

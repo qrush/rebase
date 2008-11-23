@@ -3,9 +3,11 @@ class EventsController < ApplicationController
   def index
     c = Chartify.new
 
-    @weekly_chart = c.line_chart("Weekly Chart", []) do |chart|
-      Event.kinds.each do |kind|
-       chart.data kind, Event.count(:group => 'date(published)', :conditions => ["kind = ?", kind]).map(&:last)
+    @weekly_chart = c.line_chart("Weekly Chart", Event.max_daily_commits) do |chart|
+      colors = ["000000", "ff0000","00ff00", "0000ff", "FFFF00", "3CB371", "ff00ff", "FF9900", "FFFF99", "993399"]
+      
+      Event.kinds.each_with_index do |kind, i|
+        chart.data kind, Event.count(:group => 'date(published)', :conditions => ["kind = ?", kind]).map(&:last), colors[i]
       end
     end
 
@@ -16,87 +18,24 @@ class EventsController < ApplicationController
       end
     end
 
-        
-    @daily_grouped = Event.count(:group => 'date(published)')
-    @daily_chart = c.line_chart("Daily Events", [0,4500]) do |chart|
+    @daily_chart = c.line_chart("Daily Events", Event.max_daily_events) do |chart|
       chart.show_legend = false
-      chart.data "", @daily_grouped.map(&:last), '336699'
+      chart.data "", Event.count(:group => 'date(published)').map(&:last), '336699'
     end
-    
 
-=begin
-
-    graph_size = "530x375"
-    
-    @events = Event.find_all_by_kind(params[:kind]) if params[:kind]
-    @total_grouped = Event.count(:group => :kind).sort_by(&:last).reverse
-    @daily_grouped = Event.count(:group => 'date(published)')
-    @hourly_grouped = Event.count(:group => "strftime('%m-%d-%Y %H', published)")
-    @event_count = Event.count / (7 * 24 * 60).to_f.round(3)
-
-    
-    return if @daily_grouped.empty?
-    
-    start_date = DateTime.parse(@daily_grouped.first.first).to_formatted_s(:date)
-    stop_date = DateTime.parse(@daily_grouped.last.first).to_formatted_s(:date)
-    
-    title = lambda { |t| "GitHub Rebase — #{t} — #{start_date} to #{stop_date}" }
-    y_axis = {:color => '000000', :font_size => 10, :alignment => :right}
-
-    @weekly_chart = GoogleChart::LineChart.new(graph_size, title.call("Weekly Events"), false) { |lc|
-      
-      lc.fill_area 'bbccd9', 0, 0 
-
-      Event.kinds.each do |kind|
-       lc.data kind, Event.count(:group => 'date(published)', :conditions => ["kind = ?", kind]).map(&:last)
-      end
-
-#      lc.max_value 10 # Setting max value for simple line chart 
-      #lc.range_marker :horizontal, :color => 'E5ECF9', :start_point => 0.1, :end_point => 0.5
-      #lc.range_marker :vertical, :color => 'a0bae9', :start_point => 0.1, :end_point => 0.5
-      # Draw an arrow shape marker against lowest value in dataset
-      #lc.shape_marker :arrow, :color => '000000', :data_set_index => 0, :data_point_index => 3, :pixel_size => 10   
-    }.to_url
-
-    
-    @total_chart = GoogleChart::PieChart.new("530x220", title.call("Total Events"), false) { |pc|
-      
-      @total_grouped.each do |group|
-        pc.data "#{group.first}: #{group.last}", (group.last.to_f / @total_count.to_f) * 100
-      end
-      pc.fill_area 'bbccd9', 0, 0
-      pc.is_3d = true
-      pc.fill :background, :solid, :color => 'f0f0f0'
-      
-    }.to_url(:chco => '336699')
-    
-    @daily_chart = GoogleChart::LineChart.new(graph_size, title.call("Daily Events"), false) { |lc|
-      lc.show_legend = false
-      lc.data "", @daily_grouped.map(&:last), '336699'
-      lc.fill_area 'bbccd9', 0, 0 
-      lc.axis :x, :labels => 
-        @daily_grouped.map{|g| g.first.to_datetime.to_formatted_s(:date_small)}, :color => '4183c4', :font_size => 9, :alignment => :right
-      lc.axis :y, y_axis.merge(:range => [0,4500])
-      lc.fill :background, :solid, :color => 'f0f0f0'
-    }.to_url
-    
-    @hourly_chart = GoogleChart::LineChart.new(graph_size, title.call("Hourly Events"), false) { |lc|
-      lc.show_legend = false
-      lc.data "", @hourly_grouped.map(&:last), '336699'
-      lc.fill_area 'bbccd9', 0, 0 
-      
+    @hourly_chart = c.line_chart("Hourly Events", Event.hourly_events.max) do |chart|
+      chart.show_legend = false
+      chart.data "", Event.hourly_events, '336699'
+=begin      
       lc.axis :x, :labels =>
         @daily_grouped.map(&:first).map(&:to_datetime).map(&:wday).map { |d|
           Date::DAYNAMES[d][0..1]
         }.map{ |d| [d, 6, 12, 18] }.flatten
-      
-      lc.axis :y, y_axis.merge(:range => [0,@hourly_grouped.map(&:last).max])
-      lc.fill :background, :solid, :color => 'f0f0f0'
-    }.to_url
-
-    @event_meter = GoogleChart::PieChart.new('400x175', "", false).to_url(
-      :cht => "gom", :chd => "t:#{@event_count * 10}", :chl => "#{@event_count.round(2)} events/min")
-=end 
+=end
+    end
+    
+    @event_meter = c.meter_chart("GitHub-o-Meter", Event.count / (7 * 24 * 60).to_f.round(3))
+    
   end
   
   def show
