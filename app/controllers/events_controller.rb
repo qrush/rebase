@@ -1,7 +1,8 @@
 class EventsController < ApplicationController
   
-  # this needs some serious refactoring
   def index
+=begin
+
     graph_size = "530x375"
     
     @events = Event.find_all_by_kind(params[:kind]) if params[:kind]
@@ -72,6 +73,7 @@ class EventsController < ApplicationController
 
     @event_meter = GoogleChart::PieChart.new('400x175', "", false).to_url(
       :cht => "gom", :chd => "t:#{@event_count * 10}", :chl => "#{@event_count.round(2)} events/min")
+=end 
   end
   
   def show
