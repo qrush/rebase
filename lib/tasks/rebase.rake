@@ -23,14 +23,27 @@ namespace :rebase do
 
   desc "Get rid of the files in db/timeline"
   task :nuke do
-    FileUtils.rm_r Dir.glob("#{RAILS_ROOT}/db/timeline/*")
+    FileUtils.rm_r timelines
   end
 
   desc "Rip the feeds."
   task :rip do
-    stop = 1250
     3.times do |i|
-      Kernel.fork { `rake rebase:download start=#{i+1} stop=#{stop}` }
+      Kernel.fork { `rake rebase:download start=#{i+1} stop=#{ENV['stop']}` }
     end
   end
+
+  desc "Look up the leftovers."
+  task :leftovers do
+    stop = ENV['stop'].to_i
+    real = (1..stop).to_a.sort
+    current = timelines.map{|f| f.scan(/\d+/).first.to_i}.sort
+
+    p (real - current)
+  end
+
+  def timelines
+    Dir.glob("#{RAILS_ROOT}/db/timeline/*")
+  end
+
 end
