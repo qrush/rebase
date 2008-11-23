@@ -5,7 +5,7 @@ namespace :rebase do
     page = 1
     stop = ENV['stop'].to_i
     start = ENV['start'].to_i
-
+  
     Net::HTTP.start("github.com") do |http|
       while start <= stop
 
@@ -26,4 +26,11 @@ namespace :rebase do
     FileUtils.rm_r Dir.glob("#{RAILS_ROOT}/db/timeline/*")
   end
 
+  desc "Rip the feeds."
+  task :rip do
+    stop = 1250
+    3.times do |i|
+      Kernel.fork { `rake rebase:download start=#{i+1} stop=#{stop}` }
+    end
+  end
 end
