@@ -1,0 +1,8 @@
+I'm using this little Rails app to create my weekly column, the GitHub Rebase! Don't run this app on a server, that would be really dumb. Using the app is simple. I've abstracted most of the dirty work out to Rails tasks. Here's how a normal workflow goes:
+
+# Find a good stopping point to stop ripping data. Something like: @http://github.com/timeline.atom?page=1250@
+# Download RSS files with @rake rebase:rip stop=1250@
+# Parse files with @rake rebase:parse stop=1250@
+# Fire up the server with @script/server@ and check out your pretty graphs.
+
+There's a few other rake tasks available to help out. Do a @rake -T | grep rebase@ to see them all.
