@@ -1,10 +1,9 @@
 namespace :rebase do
   desc "Parse out!"
   task :parse => :environment do
-   
-    page = 100
-    start = Date.today.to_datetime
-    stop = start - 1.week
+    page = ENV['page'] ? ENV['page'].to_i : 1
+    stop = Date.today.to_datetime
+    start = stop - 1.week
     parsing = true
 
     while parsing
@@ -23,10 +22,9 @@ namespace :rebase do
 
           if event.published >= start && event.published <= stop
             event.fill(entry)
-            return
             event.save
           elsif event.published < start
-            parse = false
+            parsing = false
             break
           end
         end

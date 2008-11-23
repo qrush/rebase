@@ -62,13 +62,6 @@ class EventsController < ApplicationController
   end
   
   def create
-    if Event.count > 0
-      flash[:error] = "Whoa, don't parse again. Nuke first, ask questions later."
-      redirect_to events_path and return
-    end
-    
-    Event.parse(convert_date('start_date'), convert_date('stop_date'), params[:events][:page].to_i)
-    
     redirect_to events_path
   end
   

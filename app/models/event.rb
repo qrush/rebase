@@ -10,7 +10,5 @@ class Event < ActiveRecord::Base
     self.unique_id = entry.id.scan(/\d+$/).first
     self.title = entry.title
     self.message = entry.content
-
-    p self
   end
 end
