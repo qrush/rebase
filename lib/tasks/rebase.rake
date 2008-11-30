@@ -8,10 +8,10 @@ namespace :rebase do
 
     while parsing
       begin
-        p "Parsing page #{page}"
+        RAILS_DEFAULT_LOGGER.info "Parsing page #{page}"
         feed = FeedNormalizer::FeedNormalizer.parse open("#{TIMELINE_ROOT}/#{page}.atom")
       rescue Exception => e
-        p "Problem parsing the feed: #{e}"
+        RAILS_DEFAULT_LOGGER.info "Problem parsing the feed: #{e}"
       end
       
       if( parsing = (feed && !feed.entries.empty?) )
@@ -51,13 +51,13 @@ namespace :rebase do
           file.write(resp.body)
         end
 
-        start += 3
+        start += ENV['step'].to_i
       end
     end
   end
 
   desc "Get rid of the files in db/timeline"
-  task :nuke_timeline => :environment do
+  task :nuke_timeline do
     FileUtils.rm_r Dir.glob(TIMELINE_GLOB)
   end
 
@@ -66,10 +66,14 @@ namespace :rebase do
     Event.delete_all
   end
 
+  desc "Nuke everything."
+  task :nuke => ["rebase:nuke_timeline", "rebase:nuke_events"]
+
   desc "Rip the feeds."
   task :rip do
-    3.times do |i|
-      Kernel.fork { `rake rebase:download start=#{i+1} stop=#{ENV['stop']}` }
+    threads = 5
+    threads.times do |i|
+      Kernel.fork { `rake rebase:download start=#{i+1} stop=#{ENV['stop']} step=#{threads}` }
     end
   end
 
@@ -78,7 +82,7 @@ namespace :rebase do
     (1..ENV['stop'].to_i).each do |i|
       delete = false
       path = "#{TIMELINE_ROOT}/#{i}.atom"
-      open(path, "r") { |f| delete = true if f.readline  =~ /^<!/ }
+      open(path, "r") { |f| delete = true unless f.readline =~ /^<\?xml/ }
       FileUtils.rm(path, :verbose => true) if delete
     end
   end

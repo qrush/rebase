@@ -37,6 +37,7 @@ class Chartify
     end
 
     def titlify(text)
-      "GitHub Rebase — #{text} — #{@start.to_formatted_s(:date)} to #{@stop.to_formatted_s(:date)}"
+      format = "%m-%d-%Y"
+      "GitHub Rebase — #{text} — #{@start.strftime(format)} to #{@stop.strftime(format)}"
     end
 end
