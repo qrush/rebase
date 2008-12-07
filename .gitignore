@@ -1,8 +1,9 @@
 *.tmproj
 config/database.yml
 *~
-log/*.log
+log/**/*
 tmp/**/*
 .DS_Store
 db/*.sqlite3
-db/timeline/*
+*.swp
+*.atom

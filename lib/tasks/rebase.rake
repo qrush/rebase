@@ -44,11 +44,19 @@ namespace :rebase do
     Net::HTTP.start("github.com") do |http|
       while start <= stop
 
-        puts "Downloading page #{start}"
+        RAILS_DEFAULT_LOGGER.info "Downloading page #{start}"
+        success = false
+        path = "#{TIMELINE_ROOT}/#{start}.atom"
 
-        resp = http.get("/timeline.atom?page=#{start}")
-        open("#{TIMELINE_ROOT}/#{start}.atom", "wb") do |file|
-          file.write(resp.body)
+        until success
+          FileUtils.rm(path) if File.exists?(path)
+          resp = http.get("/timeline.atom?page=#{start}")
+          open(path, "wb") do |f| 
+            if resp.body =~ /^<\?xml/
+              success = true
+              f.write(resp.body)
+            end
+          end
         end
 
         start += ENV['step'].to_i
