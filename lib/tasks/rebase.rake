@@ -2,8 +2,10 @@ namespace :rebase do
   desc "Parse out!"
   task :parse => :environment do
     page = ENV['page'] ? ENV['page'].to_i : 1
-    stop = Date.today.to_datetime
-    start = stop - 1.week
+#stop = Date.today.to_datetime
+#    start = stop - 1.week
+    stop = DateTime.parse("01-11-2008")
+    start = DateTime.parse("30-11-2008 23:59:59")
     parsing = true
 
     while parsing
@@ -79,7 +81,7 @@ namespace :rebase do
 
   desc "Rip the feeds."
   task :rip do
-    threads = 5
+    threads = 10
     threads.times do |i|
       Kernel.fork { `rake rebase:download start=#{i+1} stop=#{ENV['stop']} step=#{threads}` }
     end
