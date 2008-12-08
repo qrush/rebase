@@ -4,8 +4,8 @@ namespace :rebase do
     page = ENV['page'] ? ENV['page'].to_i : 1
 #stop = Date.today.to_datetime
 #    start = stop - 1.week
-    stop = DateTime.parse("01-11-2008")
-    start = DateTime.parse("30-11-2008 23:59:59")
+    start = DateTime.parse("01-11-2008")
+    stop = DateTime.parse("30-11-2008 23:59:59")
     parsing = true
 
     while parsing
@@ -21,7 +21,7 @@ namespace :rebase do
           next if entry.nil? || entry.is_a?(String)
 
           event = Event.new(:published => entry.date_published.to_datetime)
-
+        
           if event.published >= start && event.published <= stop
             event.fill(entry)
             event.save
@@ -54,7 +54,7 @@ namespace :rebase do
           FileUtils.rm(path) if File.exists?(path)
           resp = http.get("/timeline.atom?page=#{start}")
           open(path, "wb") do |f| 
-            if resp.body =~ /^<\?xml/
+            if resp.body =~ /^<\?xml/ && resp.body =~ /<entry>/
               success = true
               f.write(resp.body)
             end
@@ -67,7 +67,7 @@ namespace :rebase do
   end
 
   desc "Get rid of the files in db/timeline"
-  task :nuke_timeline do
+  task :nuke_timeline => :environment do
     FileUtils.rm_r Dir.glob(TIMELINE_GLOB)
   end
 
