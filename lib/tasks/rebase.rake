@@ -4,8 +4,8 @@ namespace :rebase do
     page = ENV['page'] ? ENV['page'].to_i : 1
 #stop = Date.today.to_datetime
 #    start = stop - 1.week
-    start = DateTime.parse("01-11-2008")
-    stop = DateTime.parse("30-11-2008 23:59:59")
+    start = DateTime.parse("07-12-2008")
+    stop = DateTime.parse("13-12-2008 23:59:59")
     parsing = true
 
     while parsing
@@ -39,30 +39,45 @@ namespace :rebase do
   desc "Download timeline feeds from GitHub"
   task :download  => :environment do
     require 'net/http'
-    page = 1
     stop = ENV['stop'].to_i
     start = ENV['start'].to_i
   
-    Net::HTTP.start("github.com") do |http|
-      while start <= stop
+    while start <= stop
+      RAILS_DEFAULT_LOGGER.info ">>> Downloading page #{start}"
+      success = false
+      path = "#{TIMELINE_ROOT}/#{start}.atom"
 
-        RAILS_DEFAULT_LOGGER.info "Downloading page #{start}"
-        success = false
-        path = "#{TIMELINE_ROOT}/#{start}.atom"
+      until success
+        RAILS_DEFAULT_LOGGER.info ">> Attempting download..."
+        success = true and break if File.exists?(path)
 
-        until success
-          FileUtils.rm(path) if File.exists?(path)
+        Net::HTTP.start("github.com") do |http|
           resp = http.get("/timeline.atom?page=#{start}")
-          open(path, "wb") do |f| 
-            if resp.body =~ /^<\?xml/ && resp.body =~ /<entry>/
+
+          if resp.code == "500"
+            RAILS_DEFAULT_LOGGER.info ">> Failwhale! Skip."
+            success = true
+            break
+          end
+
+          xml_fail = (resp.body =~ /^<\?xml/).nil?
+          entry_fail = (resp.body =~ /<entry>/).nil?
+
+          if xml_fail
+            RAILS_DEFAULT_LOGGER.info ">> Xml fail!"
+          elsif entry_fail
+            RAILS_DEFAULT_LOGGER.info ">> Entry fail!"
+          else
+            open(path, "wb") do |f| 
+              RAILS_DEFAULT_LOGGER.info ">> Success! Downloaded page #{start}."
               success = true
               f.write(resp.body)
             end
           end
         end
-
-        start += ENV['step'].to_i
       end
+
+      start += ENV['step'].to_i
     end
   end
 
