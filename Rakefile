@@ -45,11 +45,25 @@ namespace :chart do
 
 	desc "Events line breakdown"
 	task :line do
-		p Event.kinds
+		c = Chartify.new(START_DATE, END_DATE)
 
+		url = c.line_chart("Events Breakdown", Event.max_daily_commits) do |chart|
+			colors = %w(000000 ff0000 00ff00 0000ff FFFF00 3CB371 ff00ff FF9900 FFFF99 993399)
+
+			Event.kinds.each_with_index do |kind, i|
+				if Event.count(:conditions => ["kind = ?", kind]) > 500
+
+					chart.data kind, 
+										 Event.count(:group => "strftime('%m-%d-%Y %H', published)", 
+																 :conditions => ["kind = ?", kind]).map(&:last), 
+										 colors.shift
+				end
+			end
+		end
+
+		IO.popen('pbcopy', 'w').print url
 	end
-
-end
+ end
 
 desc "Parse away"
 task :parse do

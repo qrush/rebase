@@ -2,8 +2,14 @@ require 'active_record'
 
 
 class Event < ActiveRecord::Base
-	def self.kinds
-		all(:group => :kind, :select => :kind).map(&:kind)
+	class << self
+		def kinds
+			all(:group => :kind, :select => :kind).map(&:kind)
+		end
+
+		def max_daily_commits
+			count(:group => 'date(published)', :conditions => "kind = 'committed'").map(&:last).max
+		end
 	end
 end
 
