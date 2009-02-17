@@ -1,6 +1,8 @@
 DB = 'rebase.db'
-START_DATE = DateTime.parse("2009-02-01")
-END_DATE = DateTime.parse("2009-02-07 23:59:59")
+START_DATE = DateTime.parse("2009-02-08")
+END_DATE = DateTime.parse("2009-02-14 23:59:59")
+START_PAGE = 1
+END_PAGE = 3700
 
 require 'event'
 require 'chartify'
@@ -11,6 +13,16 @@ namespace :db do
 	desc "Drop db"
 	task :drop do
 		File.delete(DB) if File.exists?(DB)
+	end
+
+	desc "Purge smaller kinds"
+	task :purge do
+		Event.count(:group => :kind).each do |k|
+			if k.last < 50 
+				puts "Deleting #{k}"
+				Event.delete_all(['kind = ?', k.first])
+			end
+		end
 	end
 
 	desc "Create dbs"
@@ -68,7 +80,7 @@ namespace :chart do
 desc "Parse away"
 task :parse do
 	urls = []
-	(275..3150).each { |x| urls << "http://github.com/timeline.atom?page=#{x}" }
+	(START_PAGE..END_PAGE).each { |x| urls << "http://github.com/timeline.atom?page=#{x}" }
 
 	Feedzirra::Feed.fetch_and_parse(urls, 
 		:on_success => lambda {|u, a| puts "Got #{u}"} ).each do |k, v|
@@ -86,9 +98,7 @@ task :parse do
 			e = Event.new
 			e.user = entry.author
 			e.published = entry.published
-
-			title = entry.title.split
-			e.type = title[1]
+			e.kind = entry.title.split[1]
 			e.save
 			puts e
 		end
